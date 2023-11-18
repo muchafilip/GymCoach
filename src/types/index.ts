@@ -21,7 +21,7 @@ export interface WorkoutPlan {
 }
 
 export interface ExerciseCategory {
-    type: string;
-    target: string;
-    list: Exercise[];
+    availableEquipment: string;
+    targetBodyPart: string;
+    suggestedExcercises: Exercise[];
 }
