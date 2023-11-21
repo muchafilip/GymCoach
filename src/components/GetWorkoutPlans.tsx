@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { firestore } from '../firebase/config';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { WorkoutPlan as WorkoutPlanType } from '../types';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { WorkoutPlan as WorkoutPlanType, ExerciseSet } from '../types';
 import '../WorkoutPlan.css'; // Import the CSS file
+import SetComponent from '../components/WorkoutPlans/Set';
 
 const WorkoutPlans: React.FC = () => {
     const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlanType[]>([]);
@@ -19,6 +20,46 @@ const WorkoutPlans: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
+    const handleSetChange = async <T extends keyof ExerciseSet>(
+        planId: string,
+        dayIndex: number,
+        exerciseIndex: number,
+        setIndex: number,
+        field: T,
+        value: ExerciseSet[T]
+    ) => {
+        let newWorkoutPlans = [...workoutPlans];
+
+        // Specify the type for 'plan' as 'WorkoutPlanType'
+        const setToUpdate = newWorkoutPlans.find((plan: WorkoutPlanType) => plan.id === planId)!
+            .workoutDays[dayIndex].exercises[exerciseIndex].sets[setIndex];
+
+        // Perform the update
+        //setToUpdate[field] = value;
+
+        // Update state and Firestore
+        setWorkoutPlans(newWorkoutPlans);
+        const planDoc = doc(firestore, 'workoutPlans', planId);
+        await updateDoc(planDoc, { workoutDays: newWorkoutPlans.find((plan: WorkoutPlanType) => plan.id === planId)!.workoutDays });
+    };
+
+
+
+
+    const addSet = async (planId: string, dayIndex: number, exerciseIndex: number) => {
+        let newWorkoutPlans = [...workoutPlans];
+        const newSet = { setNumber: 1, targetReps: 5, weight: '100', repsCompleted: 3, completed: true };
+
+        newWorkoutPlans.find(plan => plan.id === planId)!
+            .workoutDays[dayIndex].exercises[exerciseIndex].sets.push(newSet);
+
+        setWorkoutPlans(newWorkoutPlans);
+
+        // Update Firestore
+        const planDoc = doc(firestore, 'workoutPlans', planId);
+        await updateDoc(planDoc, { workoutDays: newWorkoutPlans.find(plan => plan.id === planId)!.workoutDays });
+    };
+
     return (
         <div className="workout-plans-container">
             <h2 className="workout-plans-title">Workout Plans</h2>
@@ -28,19 +69,9 @@ const WorkoutPlans: React.FC = () => {
                     {plan.workoutDays.map((day, dayIndex) => (
                         <div key={dayIndex} className="workout-day">
                             <h4 className="day-name">{day.name}</h4>
-                            {day.exercises.map((exercise, exerciseIndex) => (
-                                <div key={exerciseIndex} className="exercise">
-                                    <strong className="exercise-name">{exercise.name}</strong>
-                                    <p className="exercise-description">{exercise.description}</p>
-                                    <ul className="exercise-sets">
-                                        {exercise.sets.map((set, setIndex) => (
-                                            <li key={setIndex} className="set-details">
-                                                {set.reps} reps at {set.weight} lbs
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
+
+
+
                         </div>
                     ))}
                 </div>

@@ -1,12 +1,15 @@
-export interface Set {
-    weight: number;
-    reps: number;
+export interface ExerciseSet {
+    setNumber: number;
+    targetReps: number;
+    weight: string; // Assuming weight is a string to include units like 'kg' or 'lbs'
+    repsCompleted: number | null;
+    completed: boolean;
 }
 
 export interface Exercise {
     name: string;
     description: string;
-    sets: Set[];
+    sets: ExerciseSet[];
 }
 
 export interface WorkoutDay {

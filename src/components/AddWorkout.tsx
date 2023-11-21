@@ -6,12 +6,24 @@ const AddWorkout: React.FC = () => {
     // Sample workout plan data
     const sampleWorkoutPlan: WorkoutPlan = {
         id: '1', // This should be unique for each plan
-        title: '1413 Plan',
+        title: '22222 Plan',
         workoutDays: [
             {
                 name: "day1",
-                exercises: [{ name: "squat", description: "test", sets: [{ weight: 100, reps: 8 }, { weight: 100, reps: 8 }, { weight: 100, reps: 8 }] },
-                { name: "bench press", description: "test", sets: [{ weight: 80, reps: 8 }, { weight: 90, reps: 8 }, { weight: 100, reps: 8 }] }
+                exercises: [
+                    { name: "squat", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }, { setNumber: 2, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+                    { name: "bench press", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+                    { name: "deadlift", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }, { setNumber: 2, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+
+                ]
+            },
+            {
+                name: "day2",
+                exercises: [
+                    { name: "pullup", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }, { setNumber: 2, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+                    { name: "curl", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+                    { name: "pushup", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }, { setNumber: 2, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
+
                 ]
             }
         ]
