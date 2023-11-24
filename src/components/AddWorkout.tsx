@@ -5,7 +5,6 @@ import { WorkoutPlan } from '../types'; // Import the WorkoutPlan type
 const AddWorkout: React.FC = () => {
     // Sample workout plan data
     const sampleWorkoutPlan: WorkoutPlan = {
-        id: '1', // This should be unique for each plan
         title: '22222 Plan',
         workoutDays: [
             {

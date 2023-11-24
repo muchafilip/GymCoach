@@ -18,11 +18,12 @@ export interface WorkoutDay {
 }
 
 export interface WorkoutPlan {
-    id: string;
     title: string;
     workoutDays: WorkoutDay[];
 }
-
+export interface FetchedWorkoutPlan extends WorkoutPlan {
+    id: string;
+}
 export interface ExerciseCategory {
     availableEquipment: string;
     targetBodyPart: string;

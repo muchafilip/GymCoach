@@ -8,14 +8,22 @@ import { fetchExercisesFromFirstDay } from '../../firebase/firebaseActions';
 
 interface WorkoutDayProps {
     workoutDay: WorkoutDayType;
+    workoutPlanId: string; // Add this
+    dayIndex: number;      // Add this
 }
 
-const WorkoutDay: React.FC<WorkoutDayProps> = ({ workoutDay }) => {
+const WorkoutDay: React.FC<WorkoutDayProps> = ({ workoutDay, workoutPlanId, dayIndex }) => {
     return (
         <div>
             <h2>{workoutDay.name}</h2>
-            {workoutDay.exercises.map((exercise, index) => (
-                <ExerciseComponent key={index} exercise={exercise} />
+            {workoutDay.exercises.map((exercise, exerciseIndex) => (
+                <ExerciseComponent
+                    key={exerciseIndex}
+                    exercise={exercise}
+                    workoutPlanId={workoutPlanId}
+                    dayIndex={dayIndex}
+                    exerciseIndex={exerciseIndex} // Pass the index of the exercise
+                />
             ))}
         </div>
     );
