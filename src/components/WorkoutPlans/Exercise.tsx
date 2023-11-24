@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Exercise as ExerciseType, ExerciseSet } from '../../types';
-import { saveExerciseChanges } from '../../firebase/firebaseActions';
+import { saveExerciseSetChanges } from '../../firebase/firebaseActions';
 
 interface ExerciseProps {
     exercise: ExerciseType;
@@ -23,7 +23,7 @@ const Exercise: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, dayIndex, 
         // Iterate over each set and save changes individually
         for (let i = 0; i < editableSets.length; i++) {
             try {
-                await saveExerciseChanges(
+                await saveExerciseSetChanges(
                     workoutPlanId,
                     dayIndex,
                     exerciseIndex,

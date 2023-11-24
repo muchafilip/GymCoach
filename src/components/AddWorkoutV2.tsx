@@ -1,8 +1,10 @@
 // import React from 'react';
 // import { addWorkoutPlan } from '../firebase/firebaseActions';
+// import { addWorkoutPlanNew, addWorkoutDayNew } from '../firebase/firebaseActionsV2';
+
 // import { WorkoutPlan } from '../types'; // Import the WorkoutPlan type
 
-// const AddWorkout: React.FC = () => {
+// const AddNewWorkout: React.FC = () => {
 //     // Sample workout plan data
 //     const sampleWorkoutPlan: WorkoutPlan = {
 //         title: '22222 Plan',
@@ -28,8 +30,14 @@
 //         ]
 //     };
 
-//     const handleAddWorkoutPlan = () => {
-//         addWorkoutPlan(sampleWorkoutPlan);
+//     const handleAddWorkoutPlan = async () => {
+//         const workoutPlanRef = await addWorkoutPlanNew(sampleWorkoutPlan.title);
+
+//         if (workoutPlanRef) {
+//             for (const workoutDay of sampleWorkoutPlan.workoutDays) {
+//                 await addWorkoutDayNew(workoutPlanRef.id, workoutDay);
+//             }
+//         }
 //     };
 
 //     return (
@@ -40,4 +48,5 @@
 //     );
 // };
 
-export { };
+// export default AddNewWorkout;
+export { }

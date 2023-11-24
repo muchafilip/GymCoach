@@ -110,7 +110,7 @@ export const fetchWorkoutPlan = async (): Promise<FetchedWorkoutPlan | null> => 
     }
 };
 
-export const saveExerciseChanges = async (
+export const saveExerciseSetChanges = async (
     workoutPlanId: string,
     dayIndex: number,
     exerciseIndex: number,
