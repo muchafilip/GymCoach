@@ -4,6 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { firestore } from '../../../firebase/config';
 import { WorkoutDay as WorkoutDayType, Exercise as ExerciseType } from '../../../types';
 import ExerciseComponent from './ExerciseComponent';
+import styles from './WorkoutDayCard.module.css'
 
 interface WorkoutDayCardProps {
     day: WorkoutDayType;
@@ -43,8 +44,8 @@ const WorkoutDayCard: React.FC<WorkoutDayCardProps> = ({ day, workoutPlanId }) =
     };
 
     return (
-        <div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className={styles.dayContainer}>
+            <div className={styles.dayHeader}>
                 <h2>{day.name}</h2>
                 <button onClick={toggleExpanded}>{expanded ? '-' : '+'}</button>
             </div>

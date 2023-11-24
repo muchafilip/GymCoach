@@ -12,6 +12,7 @@ export interface Exercise {
     name: string;
     description: string;
     sets: ExerciseSet[];
+    completed?: boolean;
 }
 
 export interface WorkoutDay {

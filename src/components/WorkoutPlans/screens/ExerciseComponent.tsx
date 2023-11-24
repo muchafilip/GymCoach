@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Exercise as ExerciseType, ExerciseSet } from '../../../types';
 import { firestore } from '../../../firebase/config';
 import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import styles from './ExerciseComponent.module.css';
 
 interface ExerciseProps {
     exercise: ExerciseType;
@@ -12,6 +13,8 @@ interface ExerciseProps {
 const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, dayId }) => {
     const [editableSets, setEditableSets] = useState<ExerciseSet[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isExerciseCompleted, setIsExerciseCompleted] = useState(exercise.completed ?? false);
+
 
     useEffect(() => {
         fetchSets();
@@ -43,30 +46,41 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
         }
     };
 
-    const handleSetChange = (index: number, field: any, value: any) => {
-        const updatedSets = editableSets.map((set, i) =>
-            i === index ? { ...set, [field]: value } : set
-        );
-        setEditableSets(updatedSets);
+    const updateSetInFirebase = async (setIndex: number, updatedSet: ExerciseSet) => {
+        const setRef = doc(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises/${exercise.id}/sets`, editableSets[setIndex].id);
+
+        const setUpdate = {
+            setNumber: updatedSet.setNumber,
+            targetReps: updatedSet.targetReps,
+            weight: updatedSet.weight,
+            repsCompleted: updatedSet.repsCompleted,
+            completed: updatedSet.completed,
+        };
+
+        await updateDoc(setRef, setUpdate);
     };
 
-    const handleSaveChanges = async () => {
-        if (editableSets.every(set => set.completed)) {
-            for (let set of editableSets) {
-                const setRef = doc(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises/${exercise.id}/sets`, set.id);
-                const updatedSet = {
-                    weight: set.weight,
-                    targetReps: set.targetReps,
-                    repsCompleted: set.repsCompleted,
-                    completed: set.completed
-                };
-                await updateDoc(setRef, updatedSet);
+
+    const handleSetChange = async (setIndex: number, field: keyof ExerciseSet, value: string | number | boolean) => {
+        const updatedSets = editableSets.map((set, index) =>
+            index === setIndex ? { ...set, [field]: value } : set
+        );
+        setEditableSets(updatedSets);
+
+        if (field === 'completed') {
+            // Save changes to Firestore
+            await updateSetInFirebase(setIndex, updatedSets[setIndex]);
+
+            // Check if all sets are completed
+            const allCompleted = updatedSets.every(set => set.completed);
+            if (allCompleted) {
+                // Update exercise completed status in Firestore
+                const exerciseRef = doc(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises`, exercise.id);
+                await updateDoc(exerciseRef, { completed: true });
             }
-            console.log('All sets updated');
-        } else {
-            console.log('Not all sets are completed. Changes are not saved.');
         }
     };
+
 
 
     if (loading) {
@@ -74,9 +88,16 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
     }
 
     return (
-        <div>
-            <h2>{exercise.name}</h2>
-            <table>
+        <div className={styles.exerciseContainer}>
+            <div className={styles.exerciseHeader}>
+                <h2>{exercise.name}</h2>
+                <input
+                    type="checkbox"
+                    checked={editableSets.every(set => set.completed)}
+                    onChange={e => editableSets.forEach((set, index) => handleSetChange(index, 'completed', e.target.checked))}
+                />
+            </div>
+            <table className={styles.exerciseTable}>
                 <thead>
                     <tr>
                         <th>Set</th>
@@ -91,7 +112,7 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
                         <tr key={index}>
                             <td>{set.setNumber}</td>
                             <td>
-                                <input
+                                <input className={styles.inputField}
                                     type="text"
                                     value={set.weight}
                                     onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
@@ -99,7 +120,7 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
                             </td>
                             <td>{set.targetReps}</td>
                             <td>
-                                <input
+                                <input className={styles.inputField}
                                     type="number"
                                     value={set.repsCompleted || ''}
                                     onChange={(e) => handleSetChange(index, 'repsCompleted', e.target.valueAsNumber)}
@@ -116,8 +137,8 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
                     ))}
                 </tbody>
             </table>
-            <button onClick={handleAddSet}>+ Add Set</button>
-            <button onClick={handleSaveChanges}>Save Changes</button>
+            <button className={styles.addButton} onClick={handleAddSet}>+ Add Set</button>
+
         </div>
     );
 };
