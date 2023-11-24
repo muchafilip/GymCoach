@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Exercise as ExerciseType, ExerciseSet } from '../../../types';
 import { firestore } from '../../../firebase/config';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
 
 interface ExerciseProps {
     exercise: ExerciseType;
@@ -10,7 +10,7 @@ interface ExerciseProps {
 }
 
 const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, dayId }) => {
-    const [sets, setSets] = useState<ExerciseSet[]>([]);
+    const [editableSets, setEditableSets] = useState<ExerciseSet[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,8 +22,8 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
         try {
             const setsCollectionRef = collection(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises/${exercise.id}/sets`);
             const setsSnapshot = await getDocs(setsCollectionRef);
-            const setsData = setsSnapshot.docs.map(doc => doc.data() as ExerciseSet);
-            setSets(setsData);
+            const setsData = setsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ExerciseSet[];
+            setEditableSets(setsData);
         } catch (error) {
             console.error("Error fetching sets:", error);
         } finally {
@@ -32,8 +32,8 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
     };
 
     const handleAddSet = async () => {
-        const lastSet = sets[sets.length - 1];
-        const newSet = { ...lastSet, setNumber: lastSet.setNumber + 1 };
+        const lastSet = editableSets[editableSets.length - 1] || { setNumber: 0 };
+        const newSet = { ...lastSet, setNumber: lastSet.setNumber + 1, completed: false };
 
         try {
             await addDoc(collection(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises/${exercise.id}/sets`), newSet);
@@ -43,6 +43,32 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
         }
     };
 
+    const handleSetChange = (index: number, field: any, value: any) => {
+        const updatedSets = editableSets.map((set, i) =>
+            i === index ? { ...set, [field]: value } : set
+        );
+        setEditableSets(updatedSets);
+    };
+
+    const handleSaveChanges = async () => {
+        if (editableSets.every(set => set.completed)) {
+            for (let set of editableSets) {
+                const setRef = doc(firestore, `workoutPlans/${workoutPlanId}/workoutDays/${dayId}/exercises/${exercise.id}/sets`, set.id);
+                const updatedSet = {
+                    weight: set.weight,
+                    targetReps: set.targetReps,
+                    repsCompleted: set.repsCompleted,
+                    completed: set.completed
+                };
+                await updateDoc(setRef, updatedSet);
+            }
+            console.log('All sets updated');
+        } else {
+            console.log('Not all sets are completed. Changes are not saved.');
+        }
+    };
+
+
     if (loading) {
         return <div>Loading sets...</div>;
     }
@@ -50,37 +76,50 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
     return (
         <div>
             <h2>{exercise.name}</h2>
-            {sets.length > 0 ? (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Set</th>
-                            <th>Weight</th>
-                            <th>Target Reps</th>
-                            <th>Reps Completed</th>
-                            <th>Completed</th>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Set</th>
+                        <th>Weight</th>
+                        <th>Target Reps</th>
+                        <th>Reps Completed</th>
+                        <th>Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {editableSets.map((set, index) => (
+                        <tr key={index}>
+                            <td>{set.setNumber}</td>
+                            <td>
+                                <input
+                                    type="text"
+                                    value={set.weight}
+                                    onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
+                                />
+                            </td>
+                            <td>{set.targetReps}</td>
+                            <td>
+                                <input
+                                    type="number"
+                                    value={set.repsCompleted || ''}
+                                    onChange={(e) => handleSetChange(index, 'repsCompleted', e.target.valueAsNumber)}
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    checked={set.completed}
+                                    onChange={(e) => handleSetChange(index, 'completed', e.target.checked)}
+                                />
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {sets.map((set, index) => (
-                            <tr key={index}>
-                                <td>{set.setNumber}</td>
-                                <td>{set.weight}</td>
-                                <td>{set.targetReps}</td>
-                                <td>{set.repsCompleted}</td>
-                                <td>{set.completed ? 'Yes' : 'No'}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-            ) : (
-                <div>No sets available</div>
-            )}
+                    ))}
+                </tbody>
+            </table>
             <button onClick={handleAddSet}>+ Add Set</button>
+            <button onClick={handleSaveChanges}>Save Changes</button>
         </div>
     );
 };
 
 export default ExerciseComponent;
-

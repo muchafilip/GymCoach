@@ -1,4 +1,5 @@
 export interface ExerciseSet {
+    id: string;
     setNumber: number;
     targetReps: number;
     weight: string; // Assuming weight is a string to include units like 'kg' or 'lbs'
