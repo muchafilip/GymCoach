@@ -33,7 +33,7 @@ const WorkoutPlanPage: React.FC = () => {
 
     return (
         <div>
-            <h1>Workout Plan</h1>
+            <h1>Workout Plan {workoutPlanId}</h1>
             {workoutDays.map(day => (
                 <WorkoutDayCard key={day.id} day={day} workoutPlanId={workoutPlanId} dayId={day.id} />
             ))}

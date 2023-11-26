@@ -81,8 +81,6 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
         }
     };
 
-
-
     if (loading) {
         return <div>Loading sets...</div>;
     }

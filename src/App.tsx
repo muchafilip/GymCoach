@@ -5,13 +5,6 @@ import WorkoutPlanPage from './components/WorkoutPlans/screens/WorkoutPlanPage';
 
 const App: React.FC = () => {
 
-  const workoutDay = {
-    name: "day1",
-    exercises: [{ name: "squat", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }, { setNumber: 2, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
-    { name: "bench press", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] },
-    { name: "deadlift", description: "test", sets: [{ setNumber: 1, weight: "100", targetReps: 8, repsCompleted: null, completed: false }] }
-    ]
-  }
 
   return (
     <BrowserRouter>
