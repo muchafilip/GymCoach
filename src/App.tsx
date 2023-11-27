@@ -7,6 +7,7 @@ import WorkoutPlanPage from './components/WorkoutPlans/screens/WorkoutPlanPage';
 import Login from './components/User/Login';
 import Register from './components/User/Register';
 import LogoutButton from './components/User/LogOutButton'; // Import the LogoutButton component
+import HomePage from './components/HomePage';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -37,7 +38,7 @@ const App = () => {
         )}
       </nav>
       <Routes>
-        <Route path="/" element={<h1>Welcome to the Fitness Tracker</h1>} />
+        <Route path="/" element={currentUser ? <HomePage currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/login" element={!currentUser ? <Login /> : <Navigate to="/workout" />} />
         <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/workout" />} />
         <Route path="/generate-exercises" element={currentUser ? <ExerciseSuggestionComponent /> : <Navigate to="/login" />} />
