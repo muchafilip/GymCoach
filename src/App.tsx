@@ -9,6 +9,7 @@ import Register from './components/User/Register';
 import LogoutButton from './components/User/LogOutButton'; // Import the LogoutButton component
 import HomePage from './components/HomePage';
 import WorkoutPlanGenerator from './components/WorkoutPlanGenerator';
+import UserWorkoutPlans from './components/WorkoutPlans/screens/UserWorkoutPlans';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -28,8 +29,9 @@ const App = () => {
         {currentUser ? (
           <>
             | <Link to="/generate-exercises">Generate Exercises</Link>
-            | <Link to="/workout">Workout</Link>
-            | <Link to="/generate-workout-plan">Update Template AI</Link>
+            | <Link to="/generate-workout-plan">Generate Workout Plan</Link>
+            | <Link to="/user-workout-plans">My Workout Plans</Link>
+
             | <LogoutButton />
           </>
         ) : (
@@ -41,10 +43,12 @@ const App = () => {
       </nav>
       <Routes>
         <Route path="/" element={currentUser ? <HomePage currentUser={currentUser} /> : <Navigate to="/login" />} />
-        <Route path="/login" element={!currentUser ? <Login /> : <Navigate to="/workout" />} />
-        <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/workout" />} />
+        <Route path="/login" element={!currentUser ? <Login /> : <Navigate to="/user-workout-plans" />} />
+        <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/user-workout-plans" />} />
+        <Route path="/user-workout-plans" element={currentUser ? <UserWorkoutPlans currentUser={currentUser} /> : <Navigate to="/login" />} />
+        <Route path="/workouts/:workoutPlanId" element={<WorkoutPlanPage />} />
+
         <Route path="/generate-exercises" element={currentUser ? <ExerciseSuggestionComponent /> : <Navigate to="/login" />} />
-        <Route path="/workout" element={currentUser ? <WorkoutPlanPage /> : <Navigate to="/login" />} />
         <Route path="/generate-workout-plan" element={currentUser ? <WorkoutPlanGenerator currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
