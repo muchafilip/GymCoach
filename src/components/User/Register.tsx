@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase/config';
+import { doc, setDoc } from 'firebase/firestore'; // Import these functions
+import { auth, firestore } from '../../firebase/config'; // Ensure firestore is imported from your config
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
@@ -11,7 +12,14 @@ const Register = () => {
     const handleRegister = async (event: any) => {
         event.preventDefault();
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Create a document in the users collection with the user's UID
+            await setDoc(doc(firestore, "users", user.uid), {
+                email: user.email, // You can store other user info here if needed
+            });
+
             navigate('/workout');
         } catch (error) {
             console.error("Registration failed:", error);

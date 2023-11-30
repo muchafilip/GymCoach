@@ -8,6 +8,7 @@ import Login from './components/User/Login';
 import Register from './components/User/Register';
 import LogoutButton from './components/User/LogOutButton'; // Import the LogoutButton component
 import HomePage from './components/HomePage';
+import WorkoutPlanGenerator from './components/WorkoutPlanGenerator';
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -28,6 +29,7 @@ const App = () => {
           <>
             | <Link to="/generate-exercises">Generate Exercises</Link>
             | <Link to="/workout">Workout</Link>
+            | <Link to="/generate-workout-plan">Update Template AI</Link>
             | <LogoutButton />
           </>
         ) : (
@@ -43,6 +45,7 @@ const App = () => {
         <Route path="/register" element={!currentUser ? <Register /> : <Navigate to="/workout" />} />
         <Route path="/generate-exercises" element={currentUser ? <ExerciseSuggestionComponent /> : <Navigate to="/login" />} />
         <Route path="/workout" element={currentUser ? <WorkoutPlanPage /> : <Navigate to="/login" />} />
+        <Route path="/generate-workout-plan" element={currentUser ? <WorkoutPlanGenerator currentUser={currentUser} /> : <Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );

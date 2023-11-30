@@ -8,7 +8,7 @@ import { WorkoutDay as WorkoutDayType } from '../../../types';
 
 const WorkoutPlanPage: React.FC = () => {
     const [workoutDays, setWorkoutDays] = useState<WorkoutDayType[]>([]);
-    const workoutPlanId = '7Fd6Ic55IRUtTpFqvPWW'; // Replace with actual ID
+    const workoutPlanId = 'zpqu6VNcYoJcKhqpOgYC'; // Replace with actual ID
 
     useEffect(() => {
         const fetchWorkoutDays = async () => {

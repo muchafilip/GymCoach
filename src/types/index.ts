@@ -22,8 +22,10 @@ export interface WorkoutDay {
 }
 
 export interface WorkoutPlan {
+    id?: string;
     title: string;
     workoutDays: WorkoutDay[];
+    userId?: string;
 }
 export interface FetchedWorkoutPlan extends WorkoutPlan {
     id: string;
