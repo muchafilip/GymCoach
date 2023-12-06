@@ -1,8 +1,9 @@
+//WorkoutPlanGenerator.tsx
 import React, { useState } from 'react';
 import { getExerciseSuggestionsFromAI } from '../utils/openAiUtils'; // Update the path accordingly
 import plan from '../utils/planTemplate'; // Update the path accordingly
 import { firestore } from '../firebase/config'; // Update with the correct path
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, writeBatch, doc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 
 
@@ -13,47 +14,58 @@ const WorkoutPlanGenerator: React.FC<GeneratorProps> = ({ currentUser }) => {
     const [selectedPlan, setSelectedPlan] = useState('');
     const [equipment, setEquipment] = useState('');
     const [planResult, setPlanResult] = useState(null);
+    const [showAlert, setShowAlert] = useState(false);
 
     const saveWorkoutPlanToFirestore = async (openAIResponse: any, numberOfSets: number, targetRepsPerSet: number, currentUser: User) => {
         if (!currentUser || !currentUser.uid) {
             console.error('User not logged in');
             return;
         }
+        const currentDate = new Date();
 
         try {
-            // Create a new workout plan document with userId
-            const workoutPlanDocRef = await addDoc(collection(firestore, 'workoutPlans'), {
+            const batch = writeBatch(firestore);
+
+            // Create a reference for a new workout plan document with userId
+            const workoutPlanDocRef = doc(collection(firestore, 'workoutPlans'));
+            batch.set(workoutPlanDocRef, {
                 title: openAIResponse.name,
-                userId: currentUser.uid
+                userId: currentUser.uid,
+                dateCreated: currentDate
             });
 
-            // Iterate over days in the response
-            for (const day of openAIResponse.days) {
-                const dayDocRef = await addDoc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays`), {
-                    name: day.name
-                });
+            openAIResponse.days.forEach((day: any, index: number) => {
+                const dayName = `Day ${index + 1} - ${day.name}`;
 
-                // Iterate over bodyparts/exercises
-                for (const exerciseName of day.bodyparts) {
-                    const exerciseDocRef = await addDoc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises`), {
+                const dayDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays`));
+
+                batch.set(dayDocRef, { name: dayName, isCompleted: false });
+
+                day.bodyparts.forEach((exerciseName: any) => {
+                    const exerciseDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises`));
+                    batch.set(exerciseDocRef, {
                         name: exerciseName,
                         description: `Description for ${exerciseName}`
                     });
 
-                    // Create sets for each exercise
                     for (let setNumber = 1; setNumber <= numberOfSets; setNumber++) {
-                        await addDoc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`), {
+                        const setDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`));
+                        batch.set(setDocRef, {
                             setNumber: setNumber,
                             targetReps: targetRepsPerSet,
-                            weight: '', // You can leave it empty or set a default value
+                            weight: '',
                             repsCompleted: null,
                             completed: false
                         });
                     }
-                }
-            }
+                });
+            });
 
+            await batch.commit();
             console.log('Workout plan saved successfully');
+            console.log(workoutPlanDocRef.id)
+            setShowAlert(true);
+            setTimeout(() => setShowAlert(false), 5000);
         } catch (error) {
             console.error('Error saving workout plan:', error);
         }
@@ -84,6 +96,11 @@ const WorkoutPlanGenerator: React.FC<GeneratorProps> = ({ currentUser }) => {
         <div>
             <h1>Current user: {currentUser?.uid}</h1>
             <h2>Generate Workout Plan</h2>
+            {showAlert && (
+                <div style={{ backgroundColor: 'green', padding: '10px', margin: '10px 0' }}>
+                    Workout plan saved successfully!
+                </div>
+            )}
             <select value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
                 <option value="">Select a Plan</option>
                 <option value={plan.name}>{plan.name}</option>

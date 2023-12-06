@@ -1,10 +1,17 @@
+export interface UserType {
+    email?: string;
+    subscribedWorkoutPlanId?: string;
+    currentWorkoutDayId?: string;
+}
+
 export interface ExerciseSet {
-    id: string;
+    id?: string;
     setNumber: number;
     targetReps: number;
-    weight: string; // Assuming weight is a string to include units like 'kg' or 'lbs'
+    weight: string;
     repsCompleted: number | null;
     completed: boolean;
+    isUserAdded?: boolean;
 }
 
 export interface Exercise {
@@ -12,13 +19,14 @@ export interface Exercise {
     name: string;
     description: string;
     sets: ExerciseSet[];
-    completed?: boolean;
+    isCompleted?: boolean;
 }
 
 export interface WorkoutDay {
     id: string;
     name: string;
     exercises: Exercise[];
+    isCompleted: boolean;
 }
 
 export interface WorkoutPlan {
@@ -26,12 +34,9 @@ export interface WorkoutPlan {
     title: string;
     workoutDays: WorkoutDay[];
     userId?: string;
+    dateCreated: Date;
 }
-export interface FetchedWorkoutPlan extends WorkoutPlan {
-    id: string;
-}
-export interface ExerciseCategory {
-    availableEquipment: string;
-    targetBodyPart: string;
-    suggestedExcercises: Exercise[];
-}
+
+
+
+

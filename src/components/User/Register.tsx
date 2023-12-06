@@ -17,7 +17,9 @@ const Register = () => {
 
             // Create a document in the users collection with the user's UID
             await setDoc(doc(firestore, "users", user.uid), {
-                email: user.email, // You can store other user info here if needed
+                email: user.email,
+                kkt: false
+
             });
 
             navigate('/workout');

@@ -11,7 +11,6 @@ const HomePage: React.FC<HomePageProps> = ({ currentUser }) => {
         <div>
             <h1>Hi {currentUser?.email}!</h1>
             <h2>Your userId is: {currentUser?.uid}</h2>
-            {/* You can add more content here as needed */}
         </div>
     );
 };

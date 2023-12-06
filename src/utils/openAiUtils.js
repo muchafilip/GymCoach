@@ -6,7 +6,8 @@ const openai = new OpenAI({ apiKey: process.env.REACT_APP_OPENAI_API_KEY, danger
 
 export const getExerciseSuggestionsFromAI = async (userEquipment) => {
     const template = workoutPlanTemplates;
-
+    const gpt35 = 'gpt-3.5-turbo-1106';
+    const gpt4 = "gpt-4-1106-preview";
     if (!template) {
         console.error('Template not found');
         return null;
@@ -55,7 +56,7 @@ export const getExerciseSuggestionsFromAI = async (userEquipment) => {
                     content: queryString
                 },
             ],
-            model: 'gpt-3.5-turbo-1106',
+            model: gpt35,
             response_format: { type: "json_object" }
         });
 
