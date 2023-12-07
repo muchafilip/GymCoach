@@ -3,11 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchData, fetchDocument } from './firebaseService';
-import ExerciseComponent from './Exercise';
+import ExerciseComponent from './ExerciseComponent';
 import { Exercise, WorkoutDay } from '../../types';
-import WorkoutPlanDetails from './WorkoutPlanDetails';
 
-const WorkoutDayDetails = () => {
+const WorkoutDayDetailsComponent = () => {
     const { planId, dayId } = useParams();
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [workoutDay, setWorkoutDay] = useState<WorkoutDay | null>(null); // State to hold the workout day details
@@ -30,7 +29,6 @@ const WorkoutDayDetails = () => {
     return (
         <div>
             <h1>{workoutDay?.name}</h1>
-            <h2></h2>
             {exercises.map((exercise, index) => (
                 <ExerciseComponent
                     key={exercise.id}
@@ -43,4 +41,4 @@ const WorkoutDayDetails = () => {
     );
 };
 
-export default WorkoutDayDetails;
+export default WorkoutDayDetailsComponent;

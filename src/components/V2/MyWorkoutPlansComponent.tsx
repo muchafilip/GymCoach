@@ -10,7 +10,7 @@ interface UserWorkoutPlansProps {
     currentUser: User;
 }
 
-const NewUserWorkoutPlans: React.FC<UserWorkoutPlansProps> = ({ currentUser }) => {
+const MyWorkoutPlansComponent: React.FC<UserWorkoutPlansProps> = ({ currentUser }) => {
     const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
     const [subscribedPlanId, setSubscribedPlanId] = useState<string | null>(null);
 
@@ -88,4 +88,4 @@ const NewUserWorkoutPlans: React.FC<UserWorkoutPlansProps> = ({ currentUser }) =
     );
 };
 
-export default NewUserWorkoutPlans;
+export default MyWorkoutPlansComponent;
