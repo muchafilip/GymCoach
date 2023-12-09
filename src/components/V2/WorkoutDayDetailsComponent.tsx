@@ -1,33 +1,58 @@
-// WorkoutDayDetails.tsx
-
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { fetchData, fetchDocument } from './firebaseService';
 import ExerciseComponent from './ExerciseComponent';
 import { Exercise, WorkoutDay } from '../../types';
 
 const WorkoutDayDetailsComponent = () => {
     const { planId, dayId } = useParams();
+    const navigate = useNavigate();
     const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [workoutDay, setWorkoutDay] = useState<WorkoutDay | null>(null); // State to hold the workout day details
+    const [workoutDay, setWorkoutDay] = useState<WorkoutDay | null>(null);
+    const [prevDayId, setPrevDayId] = useState<string | null>(null);
+    const [nextDayId, setNextDayId] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchExercises = async () => {
-            if (planId && dayId) {
-                const dayDetails = await fetchDocument<WorkoutDay>(`workoutPlans/${planId}/workoutDays/${dayId}`);
-                setWorkoutDay(dayDetails); // Set the workout day details in state
+        const fetchDayDetails = async () => {
+            if (planId) {
+                const allDays = await fetchData<WorkoutDay>(`workoutPlans/${planId}/workoutDays`);
+                const sortedDays = allDays.sort((a, b) => a.name.localeCompare(b.name));
+                const currentIndex = sortedDays.findIndex(day => day.id === dayId);
 
+                const prevDay = sortedDays[currentIndex - 1];
+                const nextDay = sortedDays[currentIndex + 1];
+                setPrevDayId(prevDay?.id || null);
+                setNextDayId(nextDay?.id || null);
 
-                const fetchedExercises = await fetchData<Exercise>(`workoutPlans/${planId}/workoutDays/${dayId}/exercises`);
-                setExercises(fetchedExercises);
+                if (dayId) {
+                    const dayDetails = await fetchDocument<WorkoutDay>(`workoutPlans/${planId}/workoutDays/${dayId}`);
+                    setWorkoutDay(dayDetails);
+                    const fetchedExercises = await fetchData<Exercise>(`workoutPlans/${planId}/workoutDays/${dayId}/exercises`);
+                    setExercises(fetchedExercises);
+                }
             }
         };
 
-        fetchExercises();
+        fetchDayDetails();
     }, [planId, dayId]);
+
+    const handlePrevDay = () => {
+        if (prevDayId) {
+            navigate(`/workout-plans/${planId}/days/${prevDayId}`);
+        }
+    };
+
+    const handleNextDay = () => {
+        if (nextDayId) {
+            navigate(`/workout-plans/${planId}/days/${nextDayId}`);
+        }
+    };
 
     return (
         <div>
+            <button onClick={handlePrevDay} disabled={!prevDayId}>← Previous Day</button>
+            <button onClick={handleNextDay} disabled={!nextDayId}>Next Day →</button>
+
             <h1>{workoutDay?.name}</h1>
             {exercises.map((exercise, index) => (
                 <ExerciseComponent
