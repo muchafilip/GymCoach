@@ -87,9 +87,6 @@ const CurrentWorkoutDay: React.FC<CurrentWorkoutDayProps> = ({ currentUser }) =>
         }
     };
 
-
-
-
     if (loading) return <div>Loading...</div>;
     if (!currentDay) return <div>No current workout day found.</div>;
 
