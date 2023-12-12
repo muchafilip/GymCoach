@@ -5,6 +5,7 @@ import plan from '../utils/planTemplate'; // Update the path accordingly
 import { firestore } from '../firebase/config'; // Update with the correct path
 import { collection, addDoc, writeBatch, doc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
+import { getSetsRepsConfig } from '../utils/setsRepsConfig';
 
 
 interface GeneratorProps {
@@ -28,31 +29,42 @@ const WorkoutPlanGenerator: React.FC<GeneratorProps> = ({ currentUser }) => {
 
             // Create a reference for a new workout plan document with userId
             const workoutPlanDocRef = doc(collection(firestore, 'workoutPlans'));
+            const daysPerWeek = openAIResponse.days.length; // Number of days per week
+
             batch.set(workoutPlanDocRef, {
                 title: openAIResponse.name,
                 userId: currentUser.uid,
-                dateCreated: currentDate
+                dateCreated: currentDate,
+                daysPerWeek: daysPerWeek
             });
 
             openAIResponse.days.forEach((day: any, index: number) => {
-                const dayName = `Day ${index + 1} - ${day.name}`;
+                const dayNumber = index + 1
+                const dayName = `Day ${dayNumber} - ${day.name}`;
 
                 const dayDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays`));
 
-                batch.set(dayDocRef, { name: dayName, isCompleted: false });
+                batch.set(dayDocRef, {
+                    name: dayName,
+                    isCompleted: false,
+                    dayIndex: dayNumber
+                });
 
-                day.bodyparts.forEach((exerciseName: any) => {
+                day.bodyparts.forEach((exerciseName: any, index: number) => {
                     const exerciseDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises`));
+                    const setsRepsConfig = getSetsRepsConfig(exerciseName);
+
                     batch.set(exerciseDocRef, {
                         name: exerciseName,
-                        description: `Description for ${exerciseName}`
+                        description: `Description for ${exerciseName}`,
+                        exerciseNumber: index + 1
                     });
 
-                    for (let setNumber = 1; setNumber <= numberOfSets; setNumber++) {
+                    for (let setNumber = 1; setNumber <= setsRepsConfig.numberOfSets; setNumber++) {
                         const setDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`));
                         batch.set(setDocRef, {
                             setNumber: setNumber,
-                            targetReps: targetRepsPerSet,
+                            targetReps: setsRepsConfig.targetRepsPerSet,
                             weight: '',
                             repsCompleted: null,
                             completed: false
