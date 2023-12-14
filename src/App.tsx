@@ -13,6 +13,7 @@ import MyWorkoutPlansComponent from './components/V2/MyWorkoutPlansComponent';
 import SubscribedWorkoutInfo from './components/V2/SubscribedWorkoutInfo';
 import WorkoutPlanDetails from './components/V2/WorkoutPlanDetails';
 import WorkoutDayDetailsComponent from './components/V2/WorkoutDayDetailsComponent';
+import Test from './components/TestComponent';
 
 
 const App = () => {
@@ -36,7 +37,9 @@ const App = () => {
           <>
             | <Link to="/generate-workout-plan">Generate Workout Plan</Link>
             | <Link to="/current-workout-day">Current Workout</Link>
-            | <Link to="/my-workout-plans">my Workout plans</Link>
+            | <Link to="/my-workout-plans">My Workout plans</Link>
+            | <Link to="/test">Test</Link>
+
 
             | <LogoutButton />
           </>
@@ -61,8 +64,11 @@ const App = () => {
         <Route path="/generate-workout-plan" element={currentUser ? <WorkoutPlanGenerator currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/current-workout-day" element={currentUser ? <CurrentWorkout currentUser={currentUser} /> : <Navigate to="/login" />} />
         <Route path="/my-workout-plans" element={currentUser ? <MyWorkoutPlansComponent currentUser={currentUser} /> : <Navigate to="/login" />} />
+        <Route path="/test" element={currentUser ? <Test currentUser={currentUser} /> : <Navigate to="/login" />} />
+
         <Route path="/workout-plans/:planId" element={<WorkoutPlanDetails />} />
         <Route path="/workout-plans/:planId/days/:dayId" element={<WorkoutDayDetailsComponent />} />
+
 
 
 

@@ -5,9 +5,6 @@ import plan from '../utils/planTemplate'; // Update the path accordingly
 import { firestore } from '../firebase/config'; // Update with the correct path
 import { collection, addDoc, writeBatch, doc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import { getSetsRepsConfig } from '../utils/setsRepsConfig';
-
-
 interface GeneratorProps {
     currentUser: User | null
 }
@@ -52,7 +49,6 @@ const WorkoutPlanGenerator: React.FC<GeneratorProps> = ({ currentUser }) => {
 
                 day.bodyparts.forEach((exerciseName: any, index: number) => {
                     const exerciseDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises`));
-                    const setsRepsConfig = getSetsRepsConfig(exerciseName);
 
                     batch.set(exerciseDocRef, {
                         name: exerciseName,
@@ -60,11 +56,11 @@ const WorkoutPlanGenerator: React.FC<GeneratorProps> = ({ currentUser }) => {
                         exerciseNumber: index + 1
                     });
 
-                    for (let setNumber = 1; setNumber <= setsRepsConfig.numberOfSets; setNumber++) {
+                    for (let setNumber = 1; setNumber <= 3; setNumber++) {
                         const setDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`));
                         batch.set(setDocRef, {
                             setNumber: setNumber,
-                            targetReps: setsRepsConfig.targetRepsPerSet,
+                            targetReps: 8,
                             weight: '',
                             repsCompleted: null,
                             completed: false
