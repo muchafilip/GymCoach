@@ -58,7 +58,6 @@ exports.generateNewWorkoutDay = functions.firestore
         for (const exercise of exercisesData) {
             const exerciseRef = await newWorkoutDayRef.collection('exercises').add({
                 name: exercise.name,
-                description: exercise.description,
                 isCompleted: false
             });
 

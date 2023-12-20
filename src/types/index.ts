@@ -35,6 +35,7 @@ export interface WorkoutPlan {
     workoutDays: WorkoutDay[];
     userId?: string;
     dateCreated: Date;
+    daysPerWeek: number;
 }
 
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchData } from './firebaseService';
-import { WorkoutDay } from '../../types';
+import { fetchData, fetchDocument } from './firebaseService';
+import { WorkoutDay, WorkoutPlan } from '../../types';
 
 const WorkoutPlanDetails = () => {
     const { planId } = useParams();
@@ -16,9 +16,10 @@ const WorkoutPlanDetails = () => {
                     const dayBNumber = parseInt(b.name.match(/\d+/)?.[0] ?? '0');
                     return dayANumber - dayBNumber;
                 });
-
-                // Assuming each week has the same number of days and 'day.name' includes 'Day X'
-                const daysPerWeek = 4; // Modify this if needed
+                // TODO change this to dynamic days, workoutPlan.daysPerWeek
+                const fetchPlan = await fetchDocument<WorkoutPlan>(`workoutPlans/${planId}`);
+                console.log(fetchPlan)
+                const daysPerWeek = fetchPlan.daysPerWeek;
                 const weeks = [];
                 for (let i = 0; i < sortedDays.length; i += daysPerWeek) {
                     weeks.push(sortedDays.slice(i, i + daysPerWeek));

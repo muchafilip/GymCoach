@@ -1,0 +1,96 @@
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.auth-logo {
+    font-size: 48px;
+    color: #D0342C;
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.social-button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    max-width: 280px; /* set a max-width for larger screens */
+    width: 100%; /* make it responsive */
+    box-sizing: border-box; /* ensure padding is included in width */
+    margin: 0 auto; /* center the button */
+}
+
+
+
+
+.apple {
+    background-color: #000;
+}
+
+.facebook {
+    background-color: #4267B2;
+}
+
+.google {
+    background-color: #DB4437;
+}
+
+.divider {
+    margin: 20px 0;
+    color: #ccc;
+}
+
+.auth-input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.auth-button {
+    padding: 10px;
+    background-color: #D0342C;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.auth-button:hover {
+    background-color: #a82a24;
+}
+
+.auth-footer {
+    margin-top: 20px;
+}
+
+.auth-footer a {
+    color: #D0342C;
+    text-decoration: none;
+    display: block;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

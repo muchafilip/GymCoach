@@ -1,38 +1,34 @@
-.App {
-  text-align: center;
-}
+/* ... existing styles ... */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.app-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-direction: row;
+  min-height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+.main-content {
+  flex-grow: 1;
+  padding: 10px;
+  transition: margin-left 0.5s; /* Smooth transition for the margin */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+/* Adjust main content margin for larger screens where the navbar is always visible */
+@media only screen and (min-width: 768px) {
+  .main-content {
+    margin-left: 18%; /* Adjust this value based on your sidebar width */
   }
 }
+
+/* Styles for smaller screens */
+@media only screen and (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding-bottom: 25px;
+    margin-left: 0; /* No margin for smaller screens */
+  }
+}
+
+/* ... other existing styles ... */
