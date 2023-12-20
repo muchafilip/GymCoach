@@ -23,13 +23,7 @@ function Navbar({ visible, show }) {
                 </button>
             </div>
             <nav className={!visible ? 'navbar' : ''}>
-                <button
-                    type="button"
-                    className="nav-btn"
-                    onClick={() => show(!visible)}
-                >
-                    {!visible ? <FaAngleRight size={30} /> : <FaAngleLeft size={30} />}
-                </button>
+
                 <div className="links">
                     <NavLink to="/" className="nav-link" onClick={hideNavbar}>
                         <FaThLarge size={ICON_SIZE} />
