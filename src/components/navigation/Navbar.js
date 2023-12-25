@@ -1,17 +1,30 @@
 import React from 'react';
-import { FaAngleRight, FaAngleLeft, FaThLarge, FaCalendarAlt, FaList, FaVial, FaBars } from 'react-icons/fa';
-import { NavLink } from "react-router-dom";
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase/config'; // Update the path to your firebase config
+
+import { FaAngleRight, FaAngleLeft, FaThLarge, FaCalendarAlt, FaList, FaVial, FaBars, FaSignOutAlt } from 'react-icons/fa';
+import { NavLink, useNavigate } from "react-router-dom";
 import "../../style/navbar.css";
 
 const ICON_SIZE = 20;
 
 function Navbar({ visible, show }) {
+    const navigate = useNavigate();
+
     const hideNavbar = () => {
         if (visible) {
             show(false);
         }
     };
-
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            navigate('/login'); // Redirect to login after logout
+            hideNavbar(); // Hide the navbar as well
+        } catch (error) {
+            console.error('Failed to logout:', error);
+        }
+    };
     return (
         <>
             <div className="mobile-nav">
@@ -44,6 +57,13 @@ function Navbar({ visible, show }) {
                     <NavLink to="/test" className="nav-link" onClick={hideNavbar}>
                         <FaVial size={ICON_SIZE} />
                         <span>Test</span>
+                    </NavLink>
+                </div>
+
+                <div className="links bottom-links">
+                    <NavLink to="/login" className="nav-link" onClick={handleLogout}>
+                        <FaSignOutAlt size={ICON_SIZE} />
+                        <span>Sign Out</span>
                     </NavLink>
                 </div>
             </nav>

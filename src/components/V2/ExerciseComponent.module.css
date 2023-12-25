@@ -47,7 +47,12 @@
     text-align: center;
 }
 
-.inputField {
-    width: 60px; /* Adjust the width as needed */
+.weightInputField {
+    width: 60px; /* Adjust width as needed */
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
     text-align: center;
+    size: 10
 }
+

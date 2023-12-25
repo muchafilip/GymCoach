@@ -1,17 +1,18 @@
-type Exercise = {
+export type Exercise = {
   name: string;
   primaryTarget: string;
   secondaryTargets: string[];
   defaultSets: number;
   defaultReps: number;
+  selected?: boolean; // New property to indicate if this exercise is selected
 };
 
-type WorkoutPlan = {
+export type WorkoutPlan = {
   name: string;
   daysPerWeek: number;
   days: {
     name: string;
-    bodyparts: string[] | Exercise[];
+    bodyparts: (string | { name: string; exercises: Exercise[]; selectedExercise?: Exercise })[];
   }[];
 };
 

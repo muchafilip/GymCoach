@@ -8,7 +8,7 @@ import HomePage from './components/HomePage';
 import WorkoutPlanGenerator from './components/WorkoutPlanGenerator';
 import CurrentWorkout from './components/V2/CurrentWorkout';
 import MyWorkoutPlansComponent from './components/V2/MyWorkoutPlansComponent';
-import TestComponent from './components/TestComponent';
+import Test from './components/TestComponent';
 import Navbar from './components/navigation/Navbar';
 import WorkoutPlanDetails from './components/V2/WorkoutPlanDetails';
 import WorkoutDayDetailsComponent from './components/V2/WorkoutDayDetailsComponent';
@@ -38,7 +38,7 @@ const App = () => {
           <Route path="/generate-workout-plan" element={<WorkoutPlanGenerator currentUser={currentUser} />} />
           <Route path="/current-workout-day" element={<CurrentWorkout currentUser={currentUser} />} />
           <Route path="/my-workout-plans" element={currentUser ? <MyWorkoutPlansComponent currentUser={currentUser} /> : <Login />} />
-          <Route path="/test" element={<TestComponent currentUser={currentUser} />} />
+          <Route path="/test" element={<Test currentUser={currentUser} />} />
           <Route path="/workout-plans/:planId" element={<WorkoutPlanDetails />} />
           <Route path="/workout-plans/:planId/days/:dayId" element={<WorkoutDayDetailsComponent />} />
 

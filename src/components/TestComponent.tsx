@@ -1,4 +1,3 @@
-// components/HomePage.tsx
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { writeBatch, doc, collection } from 'firebase/firestore';
@@ -69,17 +68,34 @@ type Exercise = {
   secondaryTargets: string[];
   defaultSets: number;
   defaultReps: number;
+  sets?: ExerciseSet[]; // Assuming SetType is the type for your sets, add it if necessary
 };
+
+type ExerciseSet = {
+  id?: string;
+  setNumber: number;
+  targetReps: number;
+  weight: string;
+  repsCompleted: number | null;
+  isCompleted: boolean;
+  isUserAdded?: boolean;
+}
+
 
 type WorkoutPlan = {
   name: string;
   daysPerWeek: number;
-  days: {
-    name: string;
-    bodyparts: string[] | Exercise[];
-  }[];
+  days: WorkoutPlanDay[];
 };
 
+type WorkoutPlanDay = {
+  name: string;
+  bodyparts: {
+    name: string;
+    exercises: Exercise[];
+    selectedExercise: Exercise;
+  }[];
+};
 
 
 async function fetchExercisesForEquipment(equipmentList: string[]): Promise<Exercise[]> {
@@ -95,48 +111,6 @@ async function fetchExercisesForEquipment(equipmentList: string[]): Promise<Exer
   return availableExercises;
 }
 
-async function fetchUserEquipment(userId: string): Promise<string[]> {
-  return ['barbell'];
-}
-
-async function generateWorkoutPlan(userId: string, planTemplate: WorkoutPlan): Promise<WorkoutPlan> {
-  const equipment = await fetchUserEquipment(userId);
-  const exercises = await fetchExercisesForEquipment(equipment);
-
-  // Clone the planTemplate to avoid mutating the original
-  let newPlan = JSON.parse(JSON.stringify(planTemplate));
-
-  for (let day of newPlan.days) {
-    let usedExercises: Set<string> = new Set(); // Track used exercises for the day
-    day.isCompleted = false;
-    for (let i = 0; i < day.bodyparts.length; i++) {
-      const bodypart = day.bodyparts[i];
-      // Find a matching exercise for the bodypart that hasn't been used yet
-      const matchingExercise = exercises.find(exercise =>
-        (exercise.primaryTarget === bodypart || exercise.secondaryTargets.includes(bodypart)) &&
-        !usedExercises.has(exercise.name)
-      );
-
-      if (matchingExercise) {
-        usedExercises.add(matchingExercise.name); // Mark this exercise as used for the day
-        // Replace bodypart with the exercise and add sets
-        day.bodyparts[i] = {
-          ...matchingExercise,
-          isCompleted: false,
-          sets: Array.from({ length: matchingExercise.defaultSets }, (_, index) => ({
-            setNumber: index + 1,
-            weight: '',
-            reps: matchingExercise.defaultReps,
-            isCompleted: false
-          }))
-        };
-      }
-    }
-  }
-
-  return newPlan;
-}
-
 interface MyProps {
   currentUser: User | null;
 }
@@ -146,47 +120,57 @@ const Test: React.FC<MyProps> = ({ currentUser }) => {
   const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(templates[0].name);
 
+  function createSetsForExercise(defaultSets: any, defaultReps: any) {
+    return Array.from({ length: defaultSets }, (_, index) => ({
+      setNumber: index + 1,
+      weight: '', // Default weight to empty string or another default value
+      targetReps: defaultReps,
+      isCompleted: false, // Default isCompleted to false
+      completedReps: 0
+      // Add other default properties for a set if needed
+    }));
+  }
   async function saveWorkoutPlanToFirestore(plan: WorkoutPlan, currentDate: Date) {
     try {
       const batch = writeBatch(firestore);
-      const uid = currentUser?.uid
-      // Create a reference for a new workout plan document with userId
+      const uid = currentUser?.uid;
       const workoutPlanDocRef = doc(collection(firestore, 'workoutPlans'));
+
       batch.set(workoutPlanDocRef, {
         title: plan.name,
         userId: uid,
-        dateCreated: currentDate,
+        dateCreated: currentDate.toISOString(),
         daysPerWeek: plan.daysPerWeek
       });
 
       plan.days.forEach((day, dayIndex) => {
-        console.log("Day object:", day);
-
-        const dayName = `Day ${dayIndex + 1} - ${day.name}`;
         const dayDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays`));
+        batch.set(dayDocRef, { name: `Day ${dayIndex + 1} - ${day.name}`, isCompleted: false });
 
-        batch.set(dayDocRef, { name: dayName, isCompleted: false });
-
-        day.bodyparts.forEach((exercise: any) => {
-          console.log("Exercise object:", exercise);
-
+        day.bodyparts.forEach(bodypart => {
+          const selectedExercise = bodypart.selectedExercise;
           const exerciseDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises`));
+
           batch.set(exerciseDocRef, {
-            name: exercise.name,
-            primaryTarget: exercise.primaryTarget,
-            secondaryTargets: exercise.secondaryTargets,
-            defaultSets: exercise.defaultSets,
-            defaultReps: exercise.defaultReps
+            name: selectedExercise.name,
+            primaryTarget: selectedExercise.primaryTarget,
+            secondaryTargets: selectedExercise.secondaryTargets,
+            defaultSets: selectedExercise.defaultSets,
+            defaultReps: selectedExercise.defaultReps
           });
 
-          exercise.sets.forEach((set: any) => {
-            console.log('set object', set)
-            const setDocRef = doc(collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`));
-            batch.set(setDocRef, {
+          // Create sets for the exercise
+          const sets = createSetsForExercise(selectedExercise.defaultSets, selectedExercise.defaultReps);
+
+          // Save each set to the sets subcollection
+          sets.forEach(set => {
+            const setDocRef = collection(firestore, `workoutPlans/${workoutPlanDocRef.id}/workoutDays/${dayDocRef.id}/exercises/${exerciseDocRef.id}/sets`);
+            batch.set(doc(setDocRef), {
               setNumber: set.setNumber,
               weight: set.weight,
-              targetReps: set.reps,
-              isCompleted: set.isCompleted
+              targetReps: set.targetReps,
+              isCompleted: set.isCompleted,
+              repsCompleted: set.completedReps || null
             });
           });
         });
@@ -199,6 +183,32 @@ const Test: React.FC<MyProps> = ({ currentUser }) => {
     }
   }
 
+  // Adapter function to convert templates to the new format
+  // Assuming fetchExercisesForEquipment is already an async function that returns a Promise<Exercise[]>
+
+  const adaptTemplate = async (template: any): Promise<WorkoutPlan> => {
+    const allExercises = await fetchExercisesForEquipment(['barbell', 'dumbbell']); // Await the exercises
+
+    const adaptedDays = template.days.map((day: any) => ({
+      name: day.name,
+      bodyparts: day.bodyparts.map((bodypartName: string) => {
+        const exercisesForBodyPart = allExercises.filter((exercise: Exercise) =>
+          exercise.primaryTarget === bodypartName || exercise.secondaryTargets.includes(bodypartName)
+        );
+        // Assume the first exercise is the default selected exercise
+        const selectedExercise = exercisesForBodyPart[0];
+        return {
+          name: bodypartName,
+          exercises: exercisesForBodyPart,
+          selectedExercise: selectedExercise
+        };
+      })
+    }));
+
+    return { ...template, days: adaptedDays };
+  };
+
+  // Usage within handleGeneratePlan
   const handleGeneratePlan = async () => {
     if (!currentUser) {
       console.error('No user data available');
@@ -209,8 +219,10 @@ const Test: React.FC<MyProps> = ({ currentUser }) => {
       console.error('Selected template not found');
       return;
     }
-    const customizedPlan = await generateWorkoutPlan(currentUser.uid, template);
-    setWorkoutPlan(customizedPlan);
+
+    // Adapt the template to include exercises
+    const adaptedTemplate = await adaptTemplate(template);
+    setWorkoutPlan(adaptedTemplate);
   };
 
   const handleSavePlan = async () => {
@@ -227,55 +239,66 @@ const Test: React.FC<MyProps> = ({ currentUser }) => {
     }
   };
 
+  const handleExerciseChange = (
+    dayIndex: number,
+    bodyPartIndex: number,
+    selectedExerciseName: string
+  ) => {
+    setWorkoutPlan((currentPlan: WorkoutPlan | null) => {
+      if (currentPlan === null) return null;
+
+      // Deep copy to avoid directly mutating the state
+      const newPlan: WorkoutPlan = JSON.parse(JSON.stringify(currentPlan));
+
+      // Finding the new selected exercise
+      const bodyPartExercises = newPlan.days[dayIndex].bodyparts[bodyPartIndex].exercises;
+      const selectedExercise = bodyPartExercises.find(
+        (exercise) => exercise.name === selectedExerciseName
+      );
+
+      if (selectedExercise) {
+        newPlan.days[dayIndex].bodyparts[bodyPartIndex].selectedExercise = selectedExercise;
+      }
+
+      return newPlan;
+    });
+  };
 
   const renderTable = () => {
     if (!workoutPlan) {
       return null;
     }
 
-    const maxExercises = Math.max(...workoutPlan.days.map(day => day.bodyparts.length));
-
-    const rows = [];
-    for (let i = 0; i < maxExercises; i++) {
-      const row = workoutPlan.days.map(day => {
-        const bodypart = day.bodyparts[i];
-        let exerciseContent;
-
-        if (typeof bodypart === 'string') {
-          // If bodypart is a string, display it as is
-          exerciseContent = bodypart;
-        } else {
-          // If bodypart is an Exercise object, display primaryTarget and name
-          exerciseContent = `${bodypart.primaryTarget} - ${bodypart.name}`;
-        }
-
-        return <td key={day.name + i}>{exerciseContent}</td>;
-      });
-      rows.push(<tr key={'row' + i}>{row}</tr>);
-    }
-
     return (
-      <table>
-        <thead>
-          <tr>
-            {workoutPlan.days.map(day => <th key={day.name}>{day.name}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {rows}
-        </tbody>
-      </table>
+      <div>
+        {workoutPlan.days.map((day, dayIndex) => (
+          <div key={day.name}>
+            <h3>{day.name}</h3>
+            {day.bodyparts.map((bodypart, bodyPartIndex) => (
+              <div key={`${day.name}-${bodypart.name}`}>
+                <label>{bodypart.name}: </label>
+                <select
+                  value={bodypart.selectedExercise.name}
+                  onChange={(e) => handleExerciseChange(dayIndex, bodyPartIndex, e.target.value)}
+                >
+                  {bodypart.exercises.map((exercise) => (
+                    <option key={exercise.name} value={exercise.name}>
+                      {exercise.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     );
   };
-
-
-
 
   return (
     <div>
       <div>
         <EquipmentSelectionComponent onGeneratePlan={handleGeneratePlan} />
-
       </div>
       <label>Select a Workout Plan Template: </label>
       <select value={selectedTemplateId} onChange={e => setSelectedTemplateId(e.target.value)}>
@@ -300,3 +323,40 @@ export default Test;
 
 
 
+// async function generateWorkoutPlan(userId: string, planTemplate: WorkoutPlan): Promise<WorkoutPlan> {
+//   const equipment = await fetchUserEquipment(userId);
+//   const exercises = await fetchExercisesForEquipment(equipment);
+
+//   // Clone the planTemplate to avoid mutating the original
+//   let newPlan = JSON.parse(JSON.stringify(planTemplate));
+
+//   for (let day of newPlan.days) {
+//     let usedExercises: Set<string> = new Set(); // Track used exercises for the day
+//     day.isCompleted = false;
+//     for (let i = 0; i < day.bodyparts.length; i++) {
+//       const bodypart = day.bodyparts[i];
+//       // Find a matching exercise for the bodypart that hasn't been used yet
+//       const matchingExercise = exercises.find(exercise =>
+//         (exercise.primaryTarget === bodypart || exercise.secondaryTargets.includes(bodypart)) &&
+//         !usedExercises.has(exercise.name)
+//       );
+
+//       if (matchingExercise) {
+//         usedExercises.add(matchingExercise.name); // Mark this exercise as used for the day
+//         // Replace bodypart with the exercise and add sets
+//         day.bodyparts[i] = {
+//           ...matchingExercise,
+//           isCompleted: false,
+//           sets: Array.from({ length: matchingExercise.defaultSets }, (_, index) => ({
+//             setNumber: index + 1,
+//             weight: '',
+//             reps: matchingExercise.defaultReps,
+//             isCompleted: false
+//           }))
+//         };
+//       }
+//     }
+//   }
+
+//   return newPlan;
+// }

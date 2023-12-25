@@ -32,10 +32,12 @@ exports.generateNewWorkoutDay = functions.firestore
             const setsSnapshot = await exerciseDoc.ref.collection('sets').get();
             const setsData = setsSnapshot.docs.map(setDoc => setDoc.data()).map(set => ({
                 ...set,
-                targetReps: set.targetReps === set.repsCompleted ? set.targetReps + 1 : set.targetReps,
+                targetReps: set.targetReps === parseInt(set.repsCompleted, 10) ? set.targetReps + 1 : set.targetReps,
                 repsCompleted: null,
                 completed: false
             }));
+
+
             return {
                 ...exerciseData,
                 sets: setsData

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { Exercise as ExerciseType, ExerciseSet } from '../../types';
 import { fetchData, addData, updateData } from './firebaseService'; // Adjust the import path
 import styles from './ExerciseComponent.module.css';
@@ -41,13 +42,26 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
         setEditableSets([...editableSets, addedSet]);
     };
 
+
+
     const handleSetChange = async (setIndex: number, field: keyof ExerciseSet, value: string | number | boolean) => {
+        let updatedValue: any;
+
+        if (field === 'repsCompleted') {
+            // Ensure the value is a string before parsing it as a number
+            updatedValue = typeof value === 'string' ? parseInt(value, 10) : value;
+        } else {
+            updatedValue = value;
+        }
+
         const updatedSets = editableSets.map((set, index) =>
-            index === setIndex ? { ...set, [field]: value } : set
+            index === setIndex ? { ...set, [field]: updatedValue } : set
         );
 
         setEditableSets(updatedSets);
     };
+
+
 
     const handleSetUpdate = async (setIndex: number) => {
         const setToUpdate = editableSets[setIndex];
@@ -60,6 +74,21 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
     if (loading) {
         return <div>.</div>;
     }
+    const generateWeightOptions = () => {
+        const options = [];
+        for (let i = 0; i <= 500; i += 0.5) { // Adjust the upper limit as needed
+            options.push(<option key={i} value={i}>{i}</option>);
+        }
+        return options;
+    };
+
+    const generateRepsOptions = () => {
+        const options = [];
+        for (let i = 0; i <= 100; i++) {
+            options.push(<option key={i} value={i}>{i}</option>);
+        }
+        return options;
+    };
 
     return (
         <div className={styles.exerciseContainer}>
@@ -86,23 +115,25 @@ const ExerciseComponent: React.FC<ExerciseProps> = ({ exercise, workoutPlanId, d
                         <tr key={index}>
                             <td>{set.setNumber}</td>
                             <td>
-                                <input
-                                    className={styles.inputField}
-                                    type="text"
+                                <select
+                                    className={styles.weightInputField}
                                     value={set.weight}
                                     onChange={(e) => handleSetChange(index, 'weight', e.target.value)}
                                     onBlur={() => handleSetUpdate(index)}
-                                />
+                                >
+                                    {generateWeightOptions()}
+                                </select>
                             </td>
                             <td>{set.targetReps}</td>
                             <td>
-                                <input
-                                    className={styles.inputField}
-                                    type="number"
+                                <select
+                                    className={styles.weightInputField}
                                     value={set.repsCompleted || ''}
-                                    onChange={(e) => handleSetChange(index, 'repsCompleted', e.target.valueAsNumber)}
+                                    onChange={(e) => handleSetChange(index, 'repsCompleted', e.target.value)}
                                     onBlur={() => handleSetUpdate(index)}
-                                />
+                                >
+                                    {generateRepsOptions()}
+                                </select>
                             </td>
                             <td>
                                 <input

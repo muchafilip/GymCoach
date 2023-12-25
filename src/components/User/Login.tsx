@@ -13,15 +13,16 @@ const Login = () => {
         event.preventDefault();
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            navigate('/workout');
+            navigate('/test');
         } catch (error) {
             console.error("Login failed:", error);
         }
     };
 
+
     return (
         <div className="auth-container">
-            <div className="auth-logo">RP</div>
+            <div className="auth-logo">FiloCoach</div>
             <h2>Sign in to your account</h2>
             <form onSubmit={handleLogin} className="auth-form">
                 <div className="social-buttons">

@@ -83,7 +83,9 @@ nav {
 	border: none;
 	margin: 0 10px;
 }
-
+.bottom-links {
+    margin-top: auto; /* Pushes the logout link to the bottom */
+  }
 @media only screen and (max-width: 768px){
 	nav{
 		width: 40%;
